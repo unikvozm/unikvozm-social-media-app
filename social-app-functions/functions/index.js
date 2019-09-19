@@ -3,6 +3,9 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
+const express = require("express");
+const app = express();
+
 // Create Scream function
 exports.createScream = functions.https.onRequest((req, res) => {
   if (req.method !== "POST") {
@@ -27,18 +30,29 @@ exports.createScream = functions.https.onRequest((req, res) => {
     });
 });
 
-// get screams function
-exports.getScreams = functions.https.onRequest((req, res) => {
+// get screams function, where the first parameter is route, the second is a handler
+app.get("/screams", (req, res) => {
   admin
     .firestore()
-    .collection("screams")
+		.collection("screams")
+		// make the latest scream first
+		.orderBy('createdAt', 'desc') 
     .get()
     .then(data => {
       let screams = [];
       data.forEach(doc => {
-        screams.push(doc.data());
+				// instead of pushing only data, we can request an object
+        screams.push({
+					screamId: doc.id,
+					body: doc.data().body,
+					userHandle: doc.data().userHandle,
+					createdAt: doc.data().createdAt
+				});
       });
       return res.json(screams);
     })
     .catch(err => console.error(err));
 });
+
+// we need to tell Firebase that this app is a container for all our routes
+exports.api = functions.https.onRequest(app);
