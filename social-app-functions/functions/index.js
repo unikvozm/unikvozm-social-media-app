@@ -52,4 +52,4 @@ app.get("/screams", (req, res) => {
 });
 
 // we need to tell Firebase that this app is a container for all our routes
-exports.api = functions.https.onRequest(app);
+exports.api = functions.region('europe-west3').https.onRequest(app);
