@@ -3,8 +3,19 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
-const express = require("express");
-const app = express();
+const config = {
+  apiKey: "AIzaSyAVOWCtfh6GWJFFefpsqrzA0Sf4GbowBzg",
+  authDomain: "unikvozm-social-app.firebaseapp.com",
+  databaseURL: "https://unikvozm-social-app.firebaseio.com",
+  projectId: "unikvozm-social-app",
+  storageBucket: "unikvozm-social-app.appspot.com",
+  messagingSenderId: "79821215460",
+  appId: "1:79821215460:web:d8791bc3853338ae517ef1"
+};
+
+const app = require("express")();
+const firebase = require("firebase");
+firebase.initializeApp(config);
 
 // Create Scream function
 app.post("/scream", (req, res) => {
@@ -51,5 +62,30 @@ app.get("/screams", (req, res) => {
     .catch(err => console.error(err));
 });
 
+// Signup route
+app.post("/signup", (req, res) => {
+  const newUser = {
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+    handle: req.body.handle
+  };
+
+  // TODO: validate data
+
+  firebase
+    .auth()
+    .createUserWithEmailAndPassword(newUser.email, newUser.password)
+    .then(data => {
+      return res
+        .status(201)
+        .json({ message: `user ${data.user.uid} signed up successfully` });
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    });
+});
+
 // we need to tell Firebase that this app is a container for all our routes
-exports.api = functions.region('europe-west3').https.onRequest(app);
+exports.api = functions.region("europe-west1").https.onRequest(app);
