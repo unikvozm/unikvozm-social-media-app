@@ -26,3 +26,19 @@ exports.createScream = functions.https.onRequest((req, res) => {
       console.error(err);
     });
 });
+
+// get screams function
+exports.getScreams = functions.https.onRequest((req, res) => {
+  admin
+    .firestore()
+    .collection("screams")
+    .get()
+    .then(data => {
+      let screams = [];
+      data.forEach(doc => {
+        screams.push(doc.data());
+      });
+      return res.json(screams);
+    })
+    .catch(err => console.error(err));
+});
